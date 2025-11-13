@@ -129,41 +129,74 @@ onMounted(() => {
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
-  height: 60px;
-  background-color: #1E88E5;
-  color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0 30px;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .logo {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 25px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.user-info span {
+  color: #555;
+}
+
+.user-info .el-button {
+  color: #667eea;
+  border-color: #667eea;
+  padding: 6px 18px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.user-info .el-button:hover {
+  background-color: #667eea;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
+  margin: 10px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  background-color: white;
 }
 
 .sidebar {
-  width: 200px;
-  background-color: #f5f7fa;
-  border-right: 1px solid #e4e7ed;
+  width: 220px;
+  background-color: #f8fafc;
+  border-right: 1px solid #e2e8f0;
   overflow-y: auto;
+  padding: 10px 0;
 }
 
 .sidebar-menu {
@@ -171,9 +204,35 @@ onMounted(() => {
   height: 100%;
 }
 
+.sidebar-menu :deep(.el-menu-item) {
+  padding: 12px 20px !important;
+  margin: 0 10px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  transition: all 0.3s ease;
+  color: #475569;
+}
+
+.sidebar-menu :deep(.el-menu-item:hover) {
+  background-color: #e2e8f0;
+  color: #2d3748;
+  transform: translateX(5px);
+}
+
+.sidebar-menu :deep(.el-menu-item.is-active) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.sidebar-menu :deep(.el-menu-item.is-active:hover) {
+  background: linear-gradient(135deg, #5568d3 0%, #65408c 100%);
+}
+
 .content {
   flex: 1;
-  padding: 20px;
+  padding: 25px;
   overflow-y: auto;
+  background-color: #fafafa;
 }
 </style>
