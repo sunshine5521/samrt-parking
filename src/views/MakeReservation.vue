@@ -49,7 +49,7 @@
 
     <el-table :data="parkingSpaces" border style="width: 100%; margin-top: 20px;">
       <el-table-column prop="id" label="车位ID"></el-table-column>
-      <el-table-column prop="number" label="车位编号"></el-table-column>
+      <el-table-column prop="space_number" label="车位编号"></el-table-column>
       <el-table-column prop="status" label="状态">
         <template #default="scope">
           <el-tag v-if="scope.row.status === 'free'" type="success">空闲</el-tag>
@@ -79,7 +79,7 @@ import { useRouter, useRoute } from 'vue-router'
 
 const parkingLots = ref([])
 const parkingSpaces = ref([])
-const selectedLotId = ref('')
+const selectedLotId = ref(null)
 const route = useRoute()
 const router = useRouter()
 
@@ -104,7 +104,7 @@ const fetchParkingLots = async () => {
     if (data.code === 200) {
       parkingLots.value = data.data
       if (route.query.lotId) {
-        selectedLotId.value = route.query.lotId
+        selectedLotId.value = parseInt(route.query.lotId)
       }
     } else {
       ElMessage.error(data.message)
@@ -117,7 +117,9 @@ const fetchParkingLots = async () => {
 // 监控selectedLotId变化，更新selectedLot
 watch(selectedLotId, (newLotId) => {
   if (newLotId) {
-    selectedLot.value = parkingLots.value.find(lot => lot.id === newLotId)
+    // 确保newLotId是数字类型
+    const lotId = parseInt(newLotId)
+    selectedLot.value = parkingLots.value.find(lot => lot.id === lotId)
     feeForm.value.startTime = null
     feeForm.value.endTime = null
     totalFee.value = 0
@@ -146,7 +148,9 @@ watch(selectedLotId, async (newLotId) => {
   if (newLotId) {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`http://127.0.0.1:5000/api/parking/spaces?lot_id=${newLotId}`, {
+      // 确保newLotId是数字类型
+      const lotId = parseInt(newLotId)
+      const response = await fetch(`http://127.0.0.1:5000/api/parking/spaces?lot_id=${lotId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -207,6 +211,8 @@ const makeReservation = async (spaceId) => {
     : new Date(Date.now() + 3600 * 1000).toISOString()
 
   try {
+    // 确保selectedLotId是数字类型
+    const lotId = parseInt(selectedLotId.value)
     const response = await fetch('http://127.0.0.1:5000/api/reservation', {
         method: 'POST',
         headers: {
@@ -216,7 +222,7 @@ const makeReservation = async (spaceId) => {
         body: JSON.stringify({
           user_id: user_id,
           vehicle_id,
-          parking_lot_id: selectedLotId.value,
+          parking_lot_id: lotId,
           parking_space_id: spaceId,
           start_time,
           end_time
@@ -229,7 +235,9 @@ const makeReservation = async (spaceId) => {
   if (selectedLotId.value) {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`http://127.0.0.1:5000/api/parking/spaces?lot_id=${selectedLotId.value}`, {
+      // 确保selectedLotId是数字类型
+      const lotId = parseInt(selectedLotId.value)
+      const response = await fetch(`http://127.0.0.1:5000/api/parking/spaces?lot_id=${lotId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

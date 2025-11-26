@@ -27,14 +27,18 @@
         <el-table-column prop="brand" label="车辆品牌" width="120" align="center" />
         <el-table-column prop="color" label="车辆颜色" width="120" align="center" />
         <el-table-column prop="parking_lot_name" label="停车场" width="180" align="center" />
-        <el-table-column prop="start_time" label="入场时间" width="180" align="center" />
-        <el-table-column prop="end_time" label="出场时间" width="180" align="center" />
-        <el-table-column prop="duration" label="停车时长" width="120" align="center" />
-        <el-table-column prop="amount" label="费用(元)" width="100" align="center" />
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="entry_time" label="入场时间" width="180" align="center" />
+        <el-table-column prop="exit_time" label="出场时间" width="180" align="center" />
+        <el-table-column label="停车时长" width="120" align="center">
           <template #default="scope">
-            <el-tag :type="scope.row.status === 'completed' ? 'success' : 'warning'">
-              {{ scope.row.status === 'completed' ? '已完成' : '进行中' }}
+            {{ calculateDuration(scope.row) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="cost" label="费用(元)" width="100" align="center" />
+        <el-table-column label="状态" width="100" align="center">
+          <template #default="scope">
+            <el-tag :type="scope.row.exit_time ? 'success' : 'warning'">
+              {{ scope.row.exit_time ? '已完成' : '进行中' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -71,13 +75,13 @@
         <p><strong>车牌号：</strong>{{ selectedRecord.license_plate }}</p>
         <p><strong>停车场：</strong>{{ selectedRecord.parking_lot_name }}</p>
         <p><strong>车位号：</strong>{{ selectedRecord.parking_space_number }}</p>
-        <p><strong>入场时间：</strong>{{ selectedRecord.start_time }}</p>
-        <p v-if="selectedRecord.end_time"><strong>出场时间：</strong>{{ selectedRecord.end_time }}</p>
-        <p><strong>停车时长：</strong>{{ selectedRecord.duration }}</p>
-        <p v-if="selectedRecord.amount"><strong>费用：</strong>{{ selectedRecord.amount }}元</p>
+        <p><strong>入场时间：</strong>{{ selectedRecord.entry_time }}</p>
+        <p v-if="selectedRecord.exit_time"><strong>出场时间：</strong>{{ selectedRecord.exit_time }}</p>
+        <p><strong>停车时长：</strong>{{ calculateDuration(selectedRecord) }}</p>
+        <p v-if="selectedRecord.cost"><strong>费用：</strong>{{ selectedRecord.cost }}元</p>
         <p><strong>状态：</strong>
-          <el-tag :type="selectedRecord.status === 'completed' ? 'success' : 'warning'">
-            {{ selectedRecord.status === 'completed' ? '已完成' : '进行中' }}
+          <el-tag :type="selectedRecord.exit_time ? 'success' : 'warning'">
+            {{ selectedRecord.exit_time ? '已完成' : '进行中' }}
           </el-tag>
         </p>
       </div>
@@ -104,6 +108,19 @@ export default {
     this.fetchParkingRecords()
   },
   methods: {
+    calculateDuration(record) {
+      if (!record.entry_time) return '0小时0分钟';
+      
+      const entry = new Date(record.entry_time);
+      const exit = record.exit_time ? new Date(record.exit_time) : new Date();
+      
+      const diffMs = exit - entry;
+      const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      
+      return `${diffHrs}小时${diffMins}分钟`;
+    },
+    
     fetchParkingRecords() {
       this.loading = true
       const token = localStorage.getItem('token')

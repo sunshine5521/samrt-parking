@@ -198,9 +198,16 @@ def login():
     if not user:
         return jsonify({'code': 401, 'message': '用户名不存在'}), 401
 
+    # 尝试SHA256验证
     hashed_password = hashlib.sha256(password.encode()).hexdigest()
-    if hashed_password != user['password']:
-        return jsonify({'code': 401, 'message': '密码错误'}), 401
+    if hashed_password == user['password']:
+        # SHA256验证成功
+        pass
+    else:
+        # 尝试MD5验证
+        hashed_password_md5 = hashlib.md5(password.encode()).hexdigest()
+        if hashed_password_md5 != user['password']:
+            return jsonify({'code': 401, 'message': '密码错误'}), 401
 
     token = jwt.encode({'user_id': user['id'], 'role': user['role'], 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)}, app.config['SECRET_KEY'], algorithm='HS256')
 
@@ -417,19 +424,42 @@ def get_parking_records_paginated():
         page = int(request.args.get('page', 1))
         page_size = int(request.args.get('page_size', 10))
         offset = (page - 1) * page_size
+        # Handle search parameter
+        license_plate = request.args.get('license_plate')
 
         conn = get_db_connection()
-        # Get paginated parking records with vehicle details
-        parking_records = conn.execute('''
+        
+        # Base query
+        base_query = '''
             SELECT pr.*, v.license_plate, v.brand, v.color, pl.name as parking_lot_name
             FROM parking_records pr
             JOIN vehicles v ON pr.vehicle_id = v.id
             JOIN parking_lots pl ON pr.parking_lot_id = pl.id
             WHERE pr.user_id = ?
-            LIMIT ? OFFSET ?
-        ''', (user_id, page_size, offset)).fetchall()
+        '''
+        
+        # Base count query
+        count_query = 'SELECT COUNT(*) FROM parking_records pr JOIN vehicles v ON pr.vehicle_id = v.id WHERE pr.user_id = ?'
+        
+        # Parameters list
+        params = [user_id]
+        count_params = [user_id]
+        
+        # Add search condition if license_plate is provided
+        if license_plate:
+            base_query += ' AND v.license_plate LIKE ?'
+            count_query += ' AND v.license_plate LIKE ?'
+            params.append(f'%{license_plate}%')
+            count_params.append(f'%{license_plate}%')
+        
+        # Add pagination
+        base_query += ' LIMIT ? OFFSET ?'
+        params.extend([page_size, offset])
+        
+        # Get paginated parking records with vehicle details
+        parking_records = conn.execute(base_query, params).fetchall()
         # Get total number of records
-        total = conn.execute('SELECT COUNT(*) FROM parking_records WHERE user_id = ?', (user_id,)).fetchone()[0]
+        total = conn.execute(count_query, count_params).fetchone()[0]
         conn.close()
 
         return jsonify({'code': 200, 'records': [dict(record) for record in parking_records], 'total': total})

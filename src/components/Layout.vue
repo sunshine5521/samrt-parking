@@ -20,7 +20,7 @@
             <span>停车场列表</span>
           </el-menu-item>
           <el-menu-item index="/my-vehicles">
-            <el-icon><Car /></el-icon>
+            <el-icon><Van /></el-icon>
             <span>我的车辆</span>
           </el-menu-item>
           <el-menu-item index="/reservation">
@@ -70,7 +70,7 @@ export default {
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { MapLocation, Car, Ticket, Document, Warning, User, Setting, DataAnalysis } from '@element-plus/icons-vue'
+import { MapLocation, Van, Ticket, Document, Warning, User, Setting, DataAnalysis } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()
